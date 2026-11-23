@@ -65,11 +65,6 @@ def render_metric_card(title, value, bg_color="#262730"):
         unsafe_allow_html=True,
     )
 
-@st.dialog("Fullscreen Image View", width="large")
-def open_fullscreen_modal(title, img_uint8):
-    st.subheader(title)
-    st.image(img_uint8, use_container_width=True)
-
 # ==============================================================================
 # CACHED DATA PIPELINES
 # ==============================================================================
@@ -334,23 +329,20 @@ cards = [
         "title": "Input Sinogram",
         "img": render_equal_square_image(sinogram, sinogram.min(), sinogram.max(), flip_vertical=False),
         "info": "Raw 2D projection data plotted across detector offset (horizontal) and scan angle (vertical).",
-        "key": "sinogram_zoom",
     },
     {
         "title": "Ground Truth Phantom",
         "img": render_equal_square_image(ground_truth, vmin, vmax, flip_vertical=True),
         "info": "Reference cross-sectional attenuation distribution used to generate the simulated X-ray projections.",
-        "key": "gt_zoom",
     },
 ]
 
-for idx, (name, d) in enumerate(results.items()):
+for name, d in results.items():
     cards.append(
         {
             "title": name,
             "img": render_equal_square_image(d["img"], vmin, vmax, flip_vertical=True),
             "info": d["info"],
-            "key": f"recon_zoom_{idx}",
         }
     )
 
@@ -365,5 +357,3 @@ for col, card in zip(img_cols, cards):
             )
             info_col.markdown("", help=card["info"])
             st.image(card["img"], use_container_width=True)
-            if st.button("Expand Fullscreen", key=card["key"], use_container_width=True):
-                open_fullscreen_modal(card["title"], card["img"])
