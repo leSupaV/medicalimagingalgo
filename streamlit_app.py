@@ -1,6 +1,2 @@
-import streamlit as st
-
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+from phantom_data import SHEPP_LOGAN_TABLE_3_1, generate_phantom_image, analytical_sinogram
+from algorithms import reconstruct_fbp, reconstruct_sart
