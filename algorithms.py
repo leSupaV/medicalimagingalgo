@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.fft import fft, ifft, fftfreq
 
 def reconstruct_fbp(sinogram, angles_deg, t_vals, output_size=128, zero_pad=True, window="hamming"):
     num_angles, num_rays = sinogram.shape
@@ -9,9 +8,9 @@ def reconstruct_fbp(sinogram, angles_deg, t_vals, output_size=128, zero_pad=True
     padded_sino = np.zeros((num_angles, padded_len), dtype=np.float64)
     padded_sino[:, :num_rays] = sinogram
     
-    freqs = fftfreq(padded_len, d=dt)
+    freqs = np.fft.fftfreq(padded_len, d=dt)
     ramp_filter = np.abs(freqs)
-    norm_freqs = fftfreq(padded_len)
+    norm_freqs = np.fft.fftfreq(padded_len)
     
     if window == "hamming":
         win = 0.54 + 0.46 * np.cos(2.0 * np.pi * norm_freqs)
@@ -20,8 +19,8 @@ def reconstruct_fbp(sinogram, angles_deg, t_vals, output_size=128, zero_pad=True
     else:
         win = np.ones(padded_len)
         
-    sino_fft = fft(padded_sino, axis=1)
-    filtered_sino = np.real(ifft(sino_fft * (ramp_filter * win), axis=1))[:, :num_rays]
+    sino_fft = np.fft.fft(padded_sino, axis=1)
+    filtered_sino = np.real(np.fft.ifft(sino_fft * (ramp_filter * win), axis=1))[:, :num_rays]
     
     recon = np.zeros((output_size, output_size), dtype=np.float64)
     coords = np.linspace(-1.0, 1.0, output_size)
@@ -52,7 +51,7 @@ def reconstruct_sart(sinogram, angles_deg, t_vals, output_size=128, iterations=1
     
     num_samples = int(np.ceil(2.0 / ds)) + 1
     s_vals = np.linspace(-1.0, 1.0, num_samples)
-    T_grid, S_grid = np.meshgrid(t_vals, s_vals, indexing='ij')
+    T_grid, S_grid = np.meshgrid(t_vals, s_vals, indexing="ij")
     inside_circle = (T_grid**2 + S_grid**2) <= 1.0
     L_i = np.sum(inside_circle, axis=1) * ds
     

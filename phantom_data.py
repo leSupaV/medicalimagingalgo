@@ -1,5 +1,6 @@
 import numpy as np
 
+# Kak & Slaney, Chapter 3, Table 3.1
 SHEPP_LOGAN_TABLE_3_1 = [
     (0.0,   0.0,     0.92,   0.69,    90.0,  2.00),
     (0.0,  -0.0184,  0.874,  0.6624,  90.0, -0.98),
@@ -12,6 +13,16 @@ SHEPP_LOGAN_TABLE_3_1 = [
     (0.0,  -0.605,   0.023,  0.023,    0.0,  0.01),
     (0.06, -0.605,   0.046,  0.023,   90.0,  0.01),
 ]
+
+# Kak & Slaney, Chapter 7, Fig. 7.5 (adds small subdural hematoma ellipse next to lower-right skull)
+SHEPP_LOGAN_HEMATOMA_FIG_7_5 = SHEPP_LOGAN_TABLE_3_1 + [
+    (0.45, -0.45,    0.06,   0.025,  135.0,  0.03),
+]
+
+PHANTOM_PRESETS = {
+    "Shepp-Logan Head Phantom (Table 3.1)": SHEPP_LOGAN_TABLE_3_1,
+    "Subdural Hematoma Variant (Fig. 7.5)": SHEPP_LOGAN_HEMATOMA_FIG_7_5,
+}
 
 def generate_phantom_image(grid_size=128, ellipses=SHEPP_LOGAN_TABLE_3_1):
     coords = np.linspace(-1.0, 1.0, grid_size)
