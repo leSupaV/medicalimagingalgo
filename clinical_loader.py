@@ -3,8 +3,13 @@ import numpy as np
 from PIL import Image
 
 def prepare_grid_image(arr_2d, grid_size):
-    """Resizes a 2D array to grid_size x grid_size, normalizes to [0, 1], and masks to unit circle."""
-    img_pil = Image.fromarray(arr_2d.astype(np.float64)).resize((grid_size, grid_size), Image.Resampling.BILINEAR)
+    """Resizes a 2D array or PIL Image to grid_size x grid_size, normalizes to [0, 1], and masks to unit circle."""
+    if isinstance(arr_2d, Image.Image):
+        arr_2d = np.array(arr_2d.convert("L"), dtype=np.float64)
+    else:
+        arr_2d = np.squeeze(np.asarray(arr_2d, dtype=np.float64))
+
+    img_pil = Image.fromarray(arr_2d).resize((grid_size, grid_size), Image.Resampling.BILINEAR)
     img = np.flipud(np.array(img_pil, dtype=np.float64))
 
     if img.max() > img.min():
@@ -15,6 +20,14 @@ def prepare_grid_image(arr_2d, grid_size):
     img[(X**2 + Y**2) > 1.0] = 0.0
     return img
 
+def load_medical_database_slice(sample_index=0, grid_size=128):
+    """Fetches a real 2D axial CT slice from the OrganAMNIST clinical dataset."""
+    from medmnist import OrganAMNIST
+    dataset = OrganAMNIST(split="test", download=True, size=128)
+    img_obj, _ = dataset[int(sample_index) % len(dataset)]
+    arr_2d = np.array(img_obj, dtype=np.float64).squeeze()
+    return prepare_grid_image(arr_2d, grid_size)
+
 def load_custom_image(file_bytes, file_name, grid_size):
     buf = io.BytesIO(file_bytes)
     if file_name.endswith(".npy"):
@@ -24,13 +37,6 @@ def load_custom_image(file_bytes, file_name, grid_size):
     else:
         arr = np.array(Image.open(buf).convert("L"), dtype=np.float64)
     return prepare_grid_image(arr, grid_size)
-
-def load_medical_database_slice(sample_index=0, grid_size=128):
-    """Fetches a real 2D axial CT slice from the OrganAMNIST clinical dataset."""
-    from medmnist import OrganAMNIST
-    dataset = OrganAMNIST(split="test", download=True, size=128)
-    img_array, _ = dataset[int(sample_index) % len(dataset)]
-    return prepare_grid_image(img_array.squeeze(), grid_size)
 
 def forward_project_image(image, angles_deg, num_rays=127, t_max=1.0):
     """Discrete Radon transform via bilinear ray integration (Kak & Slaney Eq. 7.25)."""
